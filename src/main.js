@@ -4,6 +4,7 @@ const {
 } = require('electron');
 const path = require('path');
 const url = require('url');
+const pug = require('electron-pug')({pretty: true});
 
 let win;
 
@@ -13,7 +14,7 @@ var createWindow = () => {
         height: 600
     });
     win.loadURL(url.format({
-        pathname: path.join(__dirname, 'index.html'),
+        pathname: path.join(__dirname, '/views/app.pug'),
         protocol: 'file:',
         slashes: true
     }));
