@@ -1,14 +1,15 @@
 class element {
-    constructor(height, width, texture) {
+    constructor(height, width, texture, rims = 0) {
         this.height = height;
         this.width = width;
         this.texture = texture;
+        this.rims = rims;
     }
 }
 
 class placedElement extends element {
-    constructor(x, y, height, width, texture) {
-        super(height, width, texture);
+    constructor(x, y, height, width, texture, rims = 0) {
+        super(height, width, texture, rims);
         this.x = x;
         this.y = y;
     }
@@ -30,14 +31,17 @@ class strip {
         this.height = height;
         this.width = width;
         this.elements = [];
-        this.free = [new freeSpace(0,0, height, width)];
+        this.free = [new freeSpace(0, 0, height, width)];
     }
-    fitElement(element) {
+    fitElement(element, exact = false) {
+        if (exact && this.height != element.height) {
+            return false;
+        }
         let done = false;
-        if (this.height <= element.height) {
+        if (this.height >= element.height) {
             this.free.forEach((free, index) => {
                 if (!done && free.width >= element.width) {
-                    this.elements.push(new placedElement(free.x, free.y, element.height, element.width, element.texture));
+                    this.elements.push(new placedElement(free.x, free.y, element.height, element.width, element.texture, element.rims));
                     this.free.splice(index, 1);
                     this.free.push(new freeSpace(free.x + element.width, free.y, free.height, free.width - element.width));
                     done = true;
@@ -56,11 +60,11 @@ class board {
         this.strips = [];
         this.free = [new freeSpace(0, 0, height, width)];
     }
-    fitElement(element) {
+    fitElement(element, exact = false) {
         let done = false;
         if (this.strips !== []) {
             this.strips.forEach((strip) => {
-                if(!done && strip.fitElement(element)) {
+                if (!done && strip.fitElement(element, exact)) {
                     done = true;
                 }
             });
@@ -86,12 +90,17 @@ class board {
 let elements = [];
 let boards = [];
 let kerf = 0;
+let rimMargin = 100;
 
 module.exports = () => {
     // sprawdzicc czy zdana formatka nie jest wieksza niz płyta
     let elementsNotOptimized = [];
-    let elementsLeft = elements;
-    let boardsOptimized = boards;
+    let elementsLeft = elements.slice();
+    let boardsOptimized = boards.slice();
+    let rimLength = 0;
+    elementsLeft.forEach((element) => {
+        rimLength += element.rims;
+    });
     elementsLeft.sort((a, b) => {
         if (a.height != b.height) {
             // sortuj pionowymi
@@ -105,24 +114,51 @@ module.exports = () => {
         // sprawdz czy w istniejacym pasie o tym samym y nie ma miejsca na formatkę
         let done = false;
         boardsOptimized.forEach((board) => {
-            if (!done && board.fitElement(element)) {
+            if (!done && board.fitElement(element, true)) { //exact
                 // place element there
+                console.log('element fitted - exact');
                 done = true;
-                elementsLeft.splice(index, 1);
             }
         });
         if (!done) {
-            // jesli nie zrob nowy pas
-            let done = false;
+            let elementsWithSameHeight = [element];
+            let i = index + 1;
+            while(i < elementsLeft.length && elementsLeft[i].height == element.height) {
+                console.log(`i:${i} good:${element.height} dunno:${elementsLeft[i].height}`);
+                elementsWithSameHeight.push(elementsLeft[i]);
+                i++;
+            }
+            console.log(elementsWithSameHeight.length);
+            let elementsWithSameHeightWidth = 0;
+            elementsWithSameHeight.forEach((element) => {
+                elementsWithSameHeightWidth += element.width;
+            });
             boardsOptimized.forEach((board) => {
-                if(!done && board.fitNewStrip(element.height)) {
-                    console.log('after new strip');
-                    console.log(board.fitElement(element));
+                if (!done && board.width >= element.width && board.fitNewStrip(element.height)) {
+                    console.log('element fitted - exact, new exact strip');
+                    board.fitElement(element);
                     done = true;
                 }
             });
-            if(!done) {
-                elementsLeft.splice(index, 1);
+            boardsOptimized.forEach((board) => {
+                if (!done && board.fitElement(element, false)) { // not exact
+                    // place element there
+                    console.log('element fitted - not exact');
+                    done = true;
+                }
+            });
+        }
+        if (!done) {
+            // jesli nie zrob nowy pas
+            boardsOptimized.forEach((board) => {
+                if (!done && board.width >= element.width && board.fitNewStrip(element.height)) {
+                    console.log('new strip');
+                    board.fitElement(element);
+                    done = true;
+                }
+            });
+            if (!done) {
+                console.log('element not fitted');
                 elementsNotOptimized.push(element);
             }
         }
@@ -130,12 +166,35 @@ module.exports = () => {
     // sprawdz czy w istniejacym pasie o mniejszym y nie ma miejsca na formatkę
     // obróć i jeszcze raz?
     // dodaj formatkę do pasa lub dodaj nowy pas i dodaj do niego formatkę
-    return boardsOptimized;
+    return {
+        boardsOptimized: boardsOptimized,
+        elementsLeft: elementsLeft,
+        elementsNotOptimized: elementsNotOptimized,
+        rim: rimLength
+    };
 };
 
-module.exports.addElement = (height, width, texture = null, amount = 1) => {
+module.exports.addElement = (height, width, texture = null, amount = 1, rims = {
+    top: false,
+    right: false,
+    bottom: false,
+    left: false
+}) => {
     for (let i = 0; i < amount; i++) {
-        elements.push(new element(height, width, texture));
+        let rimsLength = 0;
+        if (rims.top) {
+            rimsLength += width + rimMargin;
+        }
+        if (rims.bottom) {
+            rimsLength += width + rimMargin;
+        }
+        if (rims.right) {
+            rimsLength += height + rimMargin;
+        }
+        if (rims.left) {
+            rimsLength += height + rimMargin;
+        }
+        elements.push(new element(height, width, texture, rimsLength));
     }
 };
 
@@ -149,6 +208,10 @@ module.exports.setKerf = (newKerf) => {
     kerf = newKerf;
 };
 
+module.exports.setRimMargin = (newRimMargin) => {
+    rimMargin = newRimMargin;
+};
+
 module.exports.getElements = () => {
     return elements;
 };
@@ -159,4 +222,8 @@ module.exports.getBoards = () => {
 
 module.exports.getKerf = () => {
     return kerf;
+};
+
+module.exports.getRimMargin = () => {
+    return rimMargin;
 };
