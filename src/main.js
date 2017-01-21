@@ -6,7 +6,7 @@ const path = require('path');
 const url = require('url');
 const optimizationModule = require('./optimizationModule');
 const express = require('express');
-optimizationModule.addBoard(1000, 1000, null, 3);
+optimizationModule.addBoard(1000, 1000, null, 30);
 optimizationModule.addElement(66, 101, null, 10, {
     top: true
 });

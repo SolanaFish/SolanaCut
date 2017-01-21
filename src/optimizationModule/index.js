@@ -40,7 +40,7 @@ class strip {
         let done = false;
         if (this.height >= element.height) {
             this.free.forEach((free, index) => {
-                if (!done && free.width >= element.width) {
+                if (!done && free.width - this.elements.length * kerf >= element.width) {
                     this.elements.push(new placedElement(free.x, free.y, element.height, element.width, element.texture, element.rims));
                     this.free.splice(index, 1);
                     this.free.push(new freeSpace(free.x + element.width, free.y, free.height, free.width - element.width));
@@ -74,7 +74,7 @@ class board {
     fitNewStrip(height) {
         let done = false;
         this.free.forEach((free, index) => {
-            if (!done && free.height >= height) {
+            if (!done && free.height - this.strips.length * kerf >= height) {
                 this.strips.push(new strip(free.x, free.y, height, this.width));
                 this.free.splice(index, 1);
                 this.free.push(new freeSpace(free.x, free.y + height, free.height - height, this.width));
@@ -89,14 +89,14 @@ class board {
 
 let elements = [];
 let boards = [];
-let kerf = 0;
+let kerf = 3;
 let rimMargin = 100;
 
 module.exports = () => {
     // sprawdzicc czy zdana formatka nie jest wieksza niz płyta
     let elementsNotOptimized = [];
-    let elementsLeft = elements.slice();
-    let boardsOptimized = boards.slice();
+    let elementsLeft = elements;
+    let boardsOptimized = boards;
     let rimLength = 0;
     elementsLeft.forEach((element) => {
         rimLength += element.rims;
