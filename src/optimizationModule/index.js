@@ -54,11 +54,11 @@ class strip {
 
 class board {
     constructor(height, width, texture) {
-        this.height = height;
-        this.width = width;
+        this.height = height - boardMargin;
+        this.width = width - boardMargin;
         this.texture = texture;
         this.strips = [];
-        this.free = [new freeSpace(0, 0, height, width)];
+        this.free = [new freeSpace(0, 0, this.height, this.width)];
     }
     fitElement(element, exact = false) {
         let done = false;
@@ -91,12 +91,16 @@ let elements = [];
 let boards = [];
 let kerf = 3;
 let rimMargin = 100;
+let boardMargin = 30;
 
 module.exports = () => {
     // sprawdzicc czy zdana formatka nie jest wieksza niz płyta
     let elementsNotOptimized = [];
-    let elementsLeft = elements;
-    let boardsOptimized = boards;
+    let elementsLeft = JSON.parse(JSON.stringify(elements));
+    let boardsOptimized = [];
+    boards.forEach((oldBoard)=> {
+        boardsOptimized.push(new board(oldBoard.height, oldBoard.width, oldBoard.texture));
+    });
     let rimLength = 0;
     elementsLeft.forEach((element) => {
         rimLength += element.rims;
@@ -216,6 +220,10 @@ module.exports.getElements = () => {
     return elements;
 };
 
+module.exports.setBoardMargin = (newBoardMargin) => {
+    boardMargin = newBoardMargin;
+};
+
 module.exports.getBoards = () => {
     return boards;
 };
@@ -226,4 +234,8 @@ module.exports.getKerf = () => {
 
 module.exports.getRimMargin = () => {
     return rimMargin;
+};
+
+module.exports.getBoardMargin = () => {
+    return boardMargin;
 };
