@@ -1,13 +1,19 @@
-class element {
+class element { // Class of a element that was yet not fitted into a board
     constructor(height, width, texture, rims = 0) {
         this.height = height;
         this.width = width;
         this.texture = texture;
-        this.rims = rims;
+        this.rims = rims; // sum of rim lengths
+    }
+    rotate() {
+        let tempWidth = this.width;
+        this.width = this.height;
+        this.height = tempWidth;
+        this.texture = !this.texture;
     }
 }
 
-class placedElement extends element {
+class placedElement extends element { // Class of a element that was fitted inta a board
     constructor(x, y, height, width, texture, rims = 0) {
         super(height, width, texture, rims);
         this.x = x;
@@ -15,7 +21,7 @@ class placedElement extends element {
     }
 }
 
-class freeSpace {
+class freeSpace { // Class of a space, where strips or elements can be fitted
     constructor(x, y, height, width) {
         this.x = x;
         this.y = y;
@@ -24,7 +30,7 @@ class freeSpace {
     }
 }
 
-class strip {
+class strip { // Class of a stripe in a board that can fit elements and free space
     constructor(x, y, height, width) {
         this.x = x;
         this.y = y;
@@ -52,7 +58,7 @@ class strip {
     }
 }
 
-class board {
+class board { // Class of a board that can fit strips and free space
     constructor(height, width, texture) {
         this.height = height - boardMargin;
         this.width = width - boardMargin;
@@ -83,93 +89,117 @@ class board {
         });
         return done;
     }
+    rotate() {
+        let tempWidth = this.width;
+        this.width = this.height;
+        this.height = tempWidth;
+        this.texture = !this.texture;
+    }
 }
 
 
 
-let elements = [];
-let boards = [];
-let kerf = 3;
-let rimMargin = 100;
-let boardMargin = 30;
+let elements = []; // Array of elements that need to be optimalized
+let boards = []; // Array of board that elements will get fitted into
+let kerf = 3; // Kerf that is added for every cut
+let rimMargin = 100; // Margin that is added to every rim length
+let boardMargin = 30; // Margin that is rubtracted of every boards sizew
 
 module.exports = () => {
-    // sprawdzicc czy zdana formatka nie jest wieksza niz płyta
-    let elementsNotOptimized = [];
-    let elementsLeft = JSON.parse(JSON.stringify(elements));
-    let boardsOptimized = [];
-    boards.forEach((oldBoard)=> {
+    let elementsNotOptimized = []; // Array of elements that cannot be optimalized (they don't fit into any board)
+    let elementsLeft = []; // Array of elements to optimalize
+    let boardsOptimized = []; // Array of boards that elements will get fited into
+    let textureMatters = false; // variable that tells us if we have to take into consideration texture of boards
+    let rimLength = 0; // Rim length of all elements that need it
+    boards.forEach((oldBoard) => { // Copy boards to new array
         boardsOptimized.push(new board(oldBoard.height, oldBoard.width, oldBoard.texture));
     });
-    let rimLength = 0;
+    elements.forEach((oldElement) => { // Copy elements to new array
+        elementsLeft.push(new element(oldElement.height, oldElement.width, oldElement.texture, oldElement.rims));
+    });
+
+    // check if textures matter
     elementsLeft.forEach((element) => {
+        if (element.texture !== null) {
+            textureMatters = true;
+        }
+    });
+    if (textureMatters) { // If texture matters rotate everything
+        boardsOptimized.forEach((board) => {
+            if (board.texture === false) {
+                board.rotate();
+            }
+        });
+        elementsLeft.forEach((element) => {
+            if (element.texture === false) {
+                element.rotate();
+            }
+        });
+    }
+
+    elementsLeft.forEach((element) => { // Calculate rim length
         rimLength += element.rims;
     });
-    elementsLeft.sort((a, b) => {
+
+    elementsLeft.sort((a, b) => { // Sort elements
         if (a.height != b.height) {
-            // sortuj pionowymi
+            // by height
             return b.height - a.height;
         } else {
-            // sortuj pozimiymi
+            // and by width
             return b.width - a.width;
         }
     });
+
     elementsLeft.forEach((element, index) => {
-        // sprawdz czy w istniejacym pasie o tym samym y nie ma miejsca na formatkę
         let done = false;
-        boardsOptimized.forEach((board) => {
+        boardsOptimized.forEach((board) => { // Try to place element in stripe of same height as element
             if (!done && board.fitElement(element, true)) { //exact
-                // place element there
-                console.log('element fitted - exact');
                 done = true;
             }
         });
         if (!done) {
+            // Get array of not optimalized elements that are yet not optimalized
             let elementsWithSameHeight = [element];
             let i = index + 1;
-            while(i < elementsLeft.length && elementsLeft[i].height == element.height) {
-                console.log(`i:${i} good:${element.height} dunno:${elementsLeft[i].height}`);
+            while (i < elementsLeft.length && elementsLeft[i].height == element.height) {
                 elementsWithSameHeight.push(elementsLeft[i]);
                 i++;
             }
-            console.log(elementsWithSameHeight.length);
+            // Calculate their width
             let elementsWithSameHeightWidth = 0;
             elementsWithSameHeight.forEach((element) => {
                 elementsWithSameHeightWidth += element.width;
             });
+            // If their width is bigger than width of board make new strip for them
             boardsOptimized.forEach((board) => {
                 if (!done && board.width >= element.width && board.fitNewStrip(element.height)) {
-                    console.log('element fitted - exact, new exact strip');
                     board.fitElement(element);
                     done = true;
                 }
             });
+            // If that wasn't the case try to fit element into bigger strip
             boardsOptimized.forEach((board) => {
                 if (!done && board.fitElement(element, false)) { // not exact
                     // place element there
-                    console.log('element fitted - not exact');
                     done = true;
                 }
             });
         }
         if (!done) {
-            // jesli nie zrob nowy pas
+            // If any strip wasn't able to fit element try to make new strip for it
             boardsOptimized.forEach((board) => {
                 if (!done && board.width >= element.width && board.fitNewStrip(element.height)) {
-                    console.log('new strip');
                     board.fitElement(element);
                     done = true;
                 }
             });
+            // If element can't fit into new strip, then in cannot be optimalized
             if (!done) {
-                console.log('element not fitted');
                 elementsNotOptimized.push(element);
             }
         }
     });
-    // sprawdz czy w istniejacym pasie o mniejszym y nie ma miejsca na formatkę
-    // obróć i jeszcze raz?
-    // dodaj formatkę do pasa lub dodaj nowy pas i dodaj do niego formatkę
     return {
         boardsOptimized: boardsOptimized,
         elementsLeft: elementsLeft,

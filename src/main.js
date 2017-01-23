@@ -13,13 +13,13 @@ const uep = bodyParser.urlencoded({
     extended: false
 });
 
-optimizationModule.addBoard(1000, 1000, null, 30);
+optimizationModule.addBoard(1000, 1000, false, 30);
 optimizationModule.addElement(66, 101, null, 10, {
     top: true
 });
 optimizationModule.addElement(669, 100);
 optimizationModule.addElement(669, 100, null, 2);
-optimizationModule.addElement(669, 1010);
+optimizationModule.addElement(669, 1010, false);
 optimizationModule.addElement(66, 1010);
 
 const pug = require('electron-pug')({
@@ -27,9 +27,6 @@ const pug = require('electron-pug')({
 }, {
     test: optimizationModule()
 });
-
-// console.log(optimizationModule.getBoards());
-// console.log(optimizationModule.getElements());
 
 let win;
 let expressApp;
@@ -69,13 +66,21 @@ app.on('ready', () => {
     expressApp.get('/getRimMargin', (req, res) => {
         res.send(JSON.stringify(optimizationModule.getRimMargin()));
     });
+    expressApp.get('/getBoardMargin', (req, res) => {
+        res.send(JSON.stringify(optimizationModule.getBoardMargin()));
+    });
 
     expressApp.post('/addElement', uep, (req, res) => {
         let height = req.body.height;
         let width = req.body.width;
-        let texture = req.body.texture;
-        let amount = req.body.amount;
-        let rims = JSON.parse(req.body.rims);
+        let texture = req.body.texture || null;
+        let amount = req.body.amount || 1;
+        let rims = JSON.parse(req.body.rims) || {
+            top: false,
+            right: false,
+            bottom: false,
+            left: false
+        };
         optimizationModule.addElement(height, width, texture, amount, rims);
         res.sendStatus(200);
     });
@@ -87,14 +92,19 @@ app.on('ready', () => {
         optimizationModule.addBoard(height, width, texture, amount);
         res.sendStatus(200);
     });
-    expressApp.post('/addKerf', uep, (req, res) => {
+    expressApp.post('/setKerf', uep, (req, res) => {
         let kerf = req.body.kerf;
         optimizationModule.setKerf(kerf);
         res.sendStatus(200);
     });
-    expressApp.post('/addRimMargin', uep, (req, res) => {
+    expressApp.post('/setRimMargin', uep, (req, res) => {
         let margin = req.body.margin;
         optimizationModule.setRimMargin(margin);
+        res.sendStatus(200);
+    });
+    expressApp.post('/setBoardMargin', uep, (req, res) => {
+        let margin = req.body.margin;
+        optimizationModule.setBoardMargin(margin);
         res.sendStatus(200);
     });
 
