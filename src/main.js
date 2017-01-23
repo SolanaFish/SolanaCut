@@ -6,12 +6,15 @@ const {
 } = require('electron');
 const path = require('path');
 const url = require('url');
+const babel = require('babel-core');
+const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const uep = bodyParser.urlencoded({
     extended: false
 });
+fs.writeFileSync(path.join(__dirname, '../lib/app.js'),babel.transformFileSync(path.join(__dirname, '/app.js')).code);
 
 optimizationModule.addBoard(1000, 1000, false, 30);
 optimizationModule.addElement(66, 101, null, 10, {
@@ -22,22 +25,16 @@ optimizationModule.addElement(669, 100, null, 2);
 optimizationModule.addElement(669, 1010, false);
 optimizationModule.addElement(66, 1010);
 
-const pug = require('electron-pug')({
-    pretty: true
-}, {
-    test: optimizationModule()
-});
-
 let win;
 let expressApp;
 
-var createWindow = () => {
+let createWindow = () => {
     win = new BrowserWindow({
         width: 800,
         height: 600
     });
     win.loadURL(url.format({
-        pathname: path.join(__dirname, '/views/app.pug'),
+        pathname: path.join(__dirname, '/app.html'),
         protocol: 'file:',
         slashes: true
     }));
@@ -71,8 +68,8 @@ app.on('ready', () => {
     });
 
     expressApp.post('/addElement', uep, (req, res) => {
-        let height = req.body.height;
-        let width = req.body.width;
+        let height = parseInt(req.body.height);
+        let width = parseInt(req.body.width);
         let texture = req.body.texture || null;
         let amount = req.body.amount || 1;
         let rims = JSON.parse(req.body.rims) || {
