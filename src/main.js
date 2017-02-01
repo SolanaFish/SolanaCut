@@ -14,6 +14,7 @@ const bodyParser = require('body-parser');
 const uep = bodyParser.urlencoded({
     extended: false
 });
+
 fs.writeFileSync(path.join(__dirname, '../lib/app.js'),babel.transformFileSync(path.join(__dirname, '/app.js')).code);
 
 optimizationModule.addBoard(1000, 1000, false, 30);
