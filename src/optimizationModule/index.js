@@ -97,8 +97,6 @@ class board { // Class of a board that can fit strips and free space
     }
 }
 
-
-
 let elements = []; // Array of elements that need to be optimalized
 let boards = []; // Array of board that elements will get fitted into
 let kerf = 3; // Kerf that is added for every cut
@@ -136,6 +134,15 @@ module.exports = () => {
             }
         });
     }
+
+    elementsLeft.forEach((element) => {
+        if(element.texture === null) {
+            if(element.width < element.height) {
+                console.log('d');
+                element.rotate();
+            }
+        }
+    });
 
     elementsLeft.forEach((element) => { // Calculate rim length
         rimLength += element.rims;
@@ -200,12 +207,7 @@ module.exports = () => {
             }
         }
     });
-    return {
-        boardsOptimized: boardsOptimized,
-        elementsLeft: elementsLeft,
-        elementsNotOptimized: elementsNotOptimized,
-        rim: rimLength
-    };
+    return {boardsOptimized: boardsOptimized, elementsLeft: elementsLeft, elementsNotOptimized: elementsNotOptimized, rim: rimLength};
 };
 
 module.exports.addElement = (height, width, texture = null, amount = 1, rims = {
