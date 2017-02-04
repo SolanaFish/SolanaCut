@@ -19,7 +19,7 @@ import {
 } from 'material-ui/Table';
 
 injectTapEventPlugin();
-let elements = [];
+let elements = [{height: 66, width: 101, texture: null, rims: 201}];
 let boards = [];
 
 const styles = {
@@ -36,69 +36,15 @@ let cut = () => {
     req.onreadystatechange = function() {
         if (req.readyState == 4 && req.status == 200) {
             console.log(req.responseText);
+            ReactDom.render(
+                <MuiThemeProvider>
+                <div>
+                    <AppBar title="SolanaCut - cut results"/>
+                    <Result id="test" data={JSON.parse(req.responseText)}/>
+                </div>
+            </MuiThemeProvider>, document.getElementById('app'));
+
             draw(JSON.parse(req.responseText));
-        }
-    };
-};
-
-let getElements = () => {
-    let req = new XMLHttpRequest();
-    req.open('GET', 'http://localhost:9699/getElements', true);
-    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    req.send(null);
-    req.onreadystatechange = function() {
-        if (req.readyState == 4 && req.status == 200) {
-            elements = JSON.parse(req.responseText).slice();
-            console.log(req.responseText);
-        }
-    };
-};
-getElements();
-
-let getBoards = () => {
-    let req = new XMLHttpRequest();
-    req.open('GET', 'http://localhost:9699/getBoards', true);
-    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    req.send(null);
-    req.onreadystatechange = function() {
-        if (req.readyState == 4 && req.status == 200) {
-            console.log(req.responseText);
-        }
-    };
-};
-
-let getKerf = () => {
-    let req = new XMLHttpRequest();
-    req.open('GET', 'http://localhost:9699/getKerf', true);
-    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    req.send(null);
-    req.onreadystatechange = function() {
-        if (req.readyState == 4 && req.status == 200) {
-            console.log(req.responseText);
-        }
-    };
-};
-
-let getRimMargin = () => {
-    let req = new XMLHttpRequest();
-    req.open('GET', 'http://localhost:9699/getRimMargin', true);
-    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    req.send(null);
-    req.onreadystatechange = function() {
-        if (req.readyState == 4 && req.status == 200) {
-            console.log(req.responseText);
-        }
-    };
-};
-
-let getBoardMargin = () => {
-    let req = new XMLHttpRequest();
-    req.open('GET', 'http://localhost:9699/getBoardMargin', true);
-    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    req.send(null);
-    req.onreadystatechange = function() {
-        if (req.readyState == 4 && req.status == 200) {
-            console.log(req.responseText);
         }
     };
 };
@@ -298,10 +244,12 @@ class AddBoardMenu extends React.Component {
 
 class Settings extends React.Component {
     render() {
+        console.log(`render settings kerf: ${this.props.kerf}`);
         return(
             <div>
                 <div>
-                    <TextField floatingLabelText="Kerf" defaultValue="3" onChange={(change, value) => {this.setKerf(change, value);}}/>
+                    {this.props.kerf}
+                    <TextField floatingLabelText="Kerf" defaultValue={this.props.kerf} onChange={(change, value) => {this.setKerf(change, value);}}/>
                 </div>
                 <div>
                     <TextField floatingLabelText="Rim margin" defaultValue="100" onChange={(change, value) => {this.setRimMargin(change, value);}}/>
@@ -333,22 +281,6 @@ class Settings extends React.Component {
 }
 
 class ElementTable extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            fixedHeader: true,
-            fixedFooter: true,
-            stripedRows: false,
-            showRowHover: false,
-            selectable: false,
-            multiSelectable: false,
-            enableSelectAll: false,
-            deselectOnClickaway: true,
-            showCheckboxes: false,
-            elements: elements
-        };
-    }
-
     render() {
         return (
             <div>
@@ -356,7 +288,7 @@ class ElementTable extends React.Component {
                     fixedFooter={this.state.fixedFooter}
                     selectable={this.state.selectable}
                     multiSelectable={this.state.multiSelectable}
-                    onCellClick={()=> {this.setState({elements:elements});console.log(elements);}}>
+                    onCellClick={()=> {this.setState({elements:elements});console.log('elements');}}>
                     <TableHeader
                         displaySelectedAll={this.state.showCheckboxes}
                         adjustForCheckbox={this.state.showCheckboxes}
@@ -386,11 +318,10 @@ class ElementTable extends React.Component {
                         deselectOnClickaway={this.state.deselectOnClickaway}
                         showRowHover={this.state.showRowHover}
                         strippedRows={this.state.strippedRows}>
-                        {this.state.elements.forEach((element, index) => {
-                            console.log(element);
+                        {elements.forEach((element, index) => {
                             <TableRow>
                                 <TableRowColumn>
-                                    element.height
+                                    asd
                                 </TableRowColumn>
                                 <TableRowColumn>
                                     {element.width}
@@ -428,11 +359,113 @@ class Result extends React.Component {
     render() {
         return (
             <div>
+                <div>
+                    rim needed: {this.props.data.rim}
+                </div>
+                <div>
+                    elements not optimized: {this.props.data.elementsNotOptimized.length}
+                </div>
                 <canvas id="page" width="1000" height="1000"></canvas>
             </div>
         );
     }
 }
+
+class App extends React.Component {
+    constructor(props) {
+        super(props);
+        console.log('construct');
+        this.state = {kerf: 10};
+        this.getKerf();
+        this.getBoardMargin();
+        this.getRimMargin();
+    }
+
+    getElements() {
+        let req = new XMLHttpRequest();
+        req.open('GET', 'http://localhost:9699/getElements', true);
+        req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        req.send(null);
+        let that = this;
+        req.onreadystatechange = function() {
+            if (req.readyState == 4 && req.status == 200) {
+                // that.state.elements = JSON.parse(req.responseText);
+                that.setState({elements:JSON.parse(req.responseText)});
+            }
+        };
+    }
+
+    getBoards() {
+        let req = new XMLHttpRequest();
+        req.open('GET', 'http://localhost:9699/getBoards', true);
+        req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        req.send(null);
+        let that = this;
+        req.onreadystatechange = function() {
+            if (req.readyState == 4 && req.status == 200) {
+                that.state.boards = JSON.parse(req.responseText);
+            }
+        };
+    }
+
+    getKerf() {
+        let req = new XMLHttpRequest();
+        req.open('GET', 'http://localhost:9699/getKerf', true);
+        req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        req.send(null);
+        let that = this;
+        req.onreadystatechange = function() {
+            if (req.readyState == 4 && req.status == 200) {
+                // that.state.kerf = JSON.parse(req.responseText);
+                console.log(req.responseText);
+                that.setState({kerf:JSON.parse(req.responseText)});
+            }
+        };
+    }
+
+    getRimMargin() {
+        let req = new XMLHttpRequest();
+        req.open('GET', 'http://localhost:9699/getRimMargin', true);
+        req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        req.send(null);
+        let that = this;
+        req.onreadystatechange = function() {
+            if (req.readyState == 4 && req.status == 200) {
+                that.state.rimMargin = JSON.parse(req.responseText);
+            }
+        };
+    }
+
+    getBoardMargin() {
+        let req = new XMLHttpRequest();
+        req.open('GET', 'http://localhost:9699/getBoardMargin', true);
+        req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        req.send(null);
+        let that = this;
+        req.onreadystatechange = function() {
+            if (req.readyState == 4 && req.status == 200) {
+                that.state.boardMargin = JSON.parse(req.responseText);
+            }
+        };
+    }
+
+    render() {
+        console.log('render');
+        console.log(`render kerf:${this.state.kerf}`);
+        return(
+            <MuiThemeProvider>
+            <div>
+                <AppBar title="SolanaCut"/>
+                <AddElementMenu/>
+                <AddBoardMenu/>
+                <Settings kerf={this.state.kerf}/>
+                <RaisedButton label="cut" primary={true} onClick={()=> {cut();}}/>
+            </div>
+        </MuiThemeProvider>
+        );
+    }
+}
+
 function draw(cut) {
     let canvas = document.getElementById('page');
     let ctx = canvas.getContext('2d');
@@ -443,14 +476,10 @@ function draw(cut) {
     });
 }
 
+function update() {
+    ReactDom.render(
+        <App/>, document.getElementById('app'));
+}
+
 ReactDom.render(
-    <MuiThemeProvider>
-    <div>
-        <AppBar title="SolanaCut"/>
-        <AddElementMenu/>
-        <AddBoardMenu/>
-        <ElementTable id="e"/>
-        <Settings/>
-        <Result id="test"/>
-    </div>
-</MuiThemeProvider>, document.getElementById('app'));
+    <App/>, document.getElementById('app'));
