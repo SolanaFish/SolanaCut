@@ -1,9 +1,6 @@
 const optimizationModule = require('./optimizationModule');
 
-const {
-    app,
-    BrowserWindow
-} = require('electron');
+const {app, BrowserWindow} = require('electron');
 const path = require('path');
 const url = require('url');
 const babel = require('babel-core');
@@ -11,16 +8,13 @@ const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const uep = bodyParser.urlencoded({
-    extended: false
-});
+const uep = bodyParser.urlencoded({extended: false});
+const pdfkit = require('pdfkit');
 
-fs.writeFileSync(path.join(__dirname, '../lib/app.js'),babel.transformFileSync(path.join(__dirname, '/app.js')).code);
+fs.writeFileSync(path.join(__dirname, '../lib/app.js'), babel.transformFileSync(path.join(__dirname, '/app.js')).code);
 
 optimizationModule.addBoard(1000, 1000, false, 30);
-optimizationModule.addElement(66, 101, null, 10, {
-    top: true
-});
+optimizationModule.addElement(66, 101, null, 10, {top: true});
 optimizationModule.addElement(669, 100);
 optimizationModule.addElement(669, 100, null, 2);
 optimizationModule.addElement(669, 1010, false);
@@ -30,10 +24,7 @@ let win;
 let expressApp;
 
 let createWindow = () => {
-    win = new BrowserWindow({
-        width: 800,
-        height: 600
-    });
+    win = new BrowserWindow({width: 800, height: 600});
     win.loadURL(url.format({
         pathname: path.join(__dirname, '/app.html'),
         protocol: 'file:',
@@ -50,7 +41,43 @@ app.on('ready', () => {
     expressApp.use(express.static(__dirname));
 
     expressApp.get('/cut', (req, res) => {
-        res.send(JSON.stringify(optimizationModule()));
+        let result = optimizationModule();
+
+        let doc = new pdfkit();
+        doc.pipe(fs.createWriteStream('output.pdf'));
+
+        result.boardsOptimized.forEach((board, index) => {
+            if (board.strips.length > 0) {
+                let scale = board.width / 580;
+                if(index === 0) {
+                    doc.fontSize(20)
+                    .text(`Board number ${index + 1}`, 10, 10)
+                    .fontSize(12)
+                    .rect(10/scale,50/scale, (board.width)/scale, (board.height)/scale)
+                    .text(board.width, 300,  15)
+                    .text(board.height, 0,  350);
+                } else {
+                    doc.addPage()
+                    .fontSize(20)
+                    .text(`Board number ${index + 1}`, 10, 10)
+                    .fontSize(12)
+                    .rect(10/scale,50/scale, (board.width)/scale, (board.height)/scale)
+                    .text(board.width, 300,  15)
+                    .text(board.height, 0,  350);
+                }
+                board.strips.forEach((strip) => {
+                    strip.elements.forEach((element) => {
+                        doc.rect((strip.x+element.x+10)/scale, (strip.y + element.y+50)/scale, (element.width)/scale, (element.height)/scale);
+                        doc.stroke();
+                        doc.text(element.height, (strip.x + element.x+ 15)/scale, (strip.y + element.y + element.height/2+50)/scale);
+                        doc.text(element.width, (strip.x + element.x + element.width/2)/scale, (strip.y + element.y + 55)/scale);
+                    });
+                });
+            }
+        });
+        doc.end();
+
+        res.send(JSON.stringify(result));
     });
     expressApp.get('/getElements', (req, res) => {
         res.send(JSON.stringify(optimizationModule.getElements()));

@@ -22,7 +22,9 @@
     "body-parser": "^1.16.0",
     "electron-prebuilt": "^1.4.13",
     "express": "^4.14.0",
+    "jskit": "^5.1.4",
     "material-ui": "^0.16.7",
+    "pdfkit": "^0.8.0",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-tap-event-plugin": "^2.0.1"
