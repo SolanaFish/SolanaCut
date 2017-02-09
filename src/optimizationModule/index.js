@@ -93,6 +93,15 @@ class board { // Class of a board that can fit strips and free space
         });
         return done;
     }
+    canFitNewStrip(height) {
+        let done = false;
+        this.free.forEach((free, index) => {
+            if (!done && free.height - this.strips.length * kerf >= height) {
+                done = true;
+            }
+        });
+        return done;
+    }
     rotate() {
         let tempWidth = this.width;
         this.width = this.height;
@@ -171,7 +180,7 @@ module.exports = () => {
             }
         });
         if (!done) {
-            // Get array of not optimalized elements that are yet not optimalized
+            // Get array of not optimalized elements
             let elementsWithSameHeight = [element];
             let i = index + 1;
             while (i < elementsLeft.length && elementsLeft[i].height == element.height) {
@@ -180,14 +189,32 @@ module.exports = () => {
             }
             // Calculate their width
             let elementsWithSameHeightWidth = 0;
+            let elementsWithSameHeightHeight = 0;
+            let elementsWithSameHeightTexture = false;
             elementsWithSameHeight.forEach((element) => {
-                elementsWithSameHeightWidth += element.width;
+                elementsWithSameHeightWidth += element.width + kerf;
+                elementsWithSameHeightHeight += element.height + kerf;
+                if(element.texture !== null) {
+                    let elementsWithSameHeightTexture = true;
+                }
             });
-            // If their width is bigger than width of board make new strip for them
+            // If their width is bigger than  half of width of board make new strip for them
             boardsOptimized.forEach((board) => {
-                if (!done && board.width >= element.width && board.fitNewStrip(element.height)) {
-                    board.fitElement(element);
-                    done = true;
+                if(!done && elementsWithSameHeightWidth > board.width / 2) {
+                    if(elementsWithSameHeightWidth <= board.width) {
+                        board.fitNewStrip(element.height);
+                        board.fitElement(element);
+                        done = true;
+                    } else {
+                        if(elementsWithSameHeightHeight < board.width && elementsWithSameHeightHeight > board.width / 2) {
+                            elementsWithSameHeight.forEach((element) => {
+                                element.rotate();
+                            });
+                            board.fitNewStrip(element.height);
+                            board.fitElement(element);
+                            done = true;
+                        }
+                    }
                 }
             });
             // If that wasn't the case try to fit element into bigger strip
