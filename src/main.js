@@ -53,24 +53,24 @@ app.on('ready', () => {
                     doc.fontSize(20)
                     .text(`Board number ${index + 1}`, 10, 10)
                     .fontSize(12)
-                    .rect(10/scale,50/scale, (board.width)/scale, (board.height)/scale)
-                    .text(board.width, 300,  15)
+                    .rect(10,50, (board.width)/scale, (board.height)/scale)
+                    .text(board.width, 300,  35)
                     .text(board.height, 0,  350);
                 } else {
                     doc.addPage()
                     .fontSize(20)
                     .text(`Board number ${index + 1}`, 10, 10)
                     .fontSize(12)
-                    .rect(10/scale,50/scale, (board.width)/scale, (board.height)/scale)
-                    .text(board.width, 300,  15)
+                    .rect(10,50, (board.width)/scale, (board.height)/scale)
+                    .text(board.width, 300,  35)
                     .text(board.height, 0,  350);
                 }
                 board.strips.forEach((strip) => {
                     strip.elements.forEach((element) => {
-                        doc.rect((strip.x+element.x+10)/scale, (strip.y + element.y+50)/scale, (element.width)/scale, (element.height)/scale);
+                        doc.rect((strip.x+element.x)/scale + 10, (strip.y + element.y)/scale + 50, (element.width)/scale, (element.height)/scale);
                         doc.stroke();
-                        doc.text(element.height, (strip.x + element.x+ 15)/scale, (strip.y + element.y + element.height/2+50)/scale);
-                        doc.text(element.width, (strip.x + element.x + element.width/2)/scale, (strip.y + element.y + 55)/scale);
+                        doc.text(element.height, (strip.x + element.x)/scale + 15, (strip.y + element.y + element.height/2)/scale + 50);
+                        doc.text(element.width, (strip.x + element.x + element.width/2)/scale, (strip.y + element.y)/scale + 55);
                     });
                 });
             }

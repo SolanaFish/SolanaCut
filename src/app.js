@@ -28,6 +28,44 @@ const styles = {
     }
 };
 
+let lang = {
+    addElementMenu: {
+        addElement: 'Dodaj element',
+        height: 'wysokosc',
+        width: 'szerokosc',
+        amount: 'ilosc',
+        texture: {
+            texture: 'Tekstura',
+            none: 'nieistotna',
+            vertical: 'pionowa',
+            horizontal: 'pozioma'
+        }
+    },
+    addBoardMenu: {
+        addBoard: 'Dodaj plyte',
+        height: 'wysokosc',
+        width: 'szerokosc',
+        amount: 'ilosc',
+        texture: {
+            texture: 'Tekstura',
+            none: 'nieistotna',
+            vertical: 'pionowa',
+            horizontal: 'pozioma'
+        }
+    },
+    settings: {
+        kerf: 'rzaz',
+        rimMargin:'margines doklejki',
+        boardMargin: 'wyrownanie plyty'
+    },
+    results: {
+        results: 'wyniki rozkroju',
+        rim: 'potrzebna doklejka',
+        notOptimized: 'elementy niezoptymalizowane',
+        boardNumber: 'plyta numer: '
+    }
+};
+
 let cut = () => {
     let req = new XMLHttpRequest();
     req.open('GET', 'http://localhost:9699/cut', true);
@@ -42,8 +80,6 @@ let cut = () => {
                     <Result data={JSON.parse(req.responseText)}/>
                 </div>
             </MuiThemeProvider>, document.getElementById('app'));
-
-            draw(JSON.parse(req.responseText));
         }
     };
 };
@@ -126,15 +162,15 @@ class AddElementMenu extends React.Component {
         return (
             <div>
                 <div>
-                    Add element
+                    {lang.addElementMenu.addElement}
                 </div>
-                <TextField floatingLabelText="Height" onChange={(change, value) => {this.heightChange(change, value);}}/>
-                <TextField floatingLabelText="Width" onChange={(change, value) => {this.widthChange(change, value);}}/>
-                <TextField floatingLabelText="Amount" defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
+                <TextField floatingLabelText={lang.addElementMenu.height} onChange={(change, value) => {this.heightChange(change, value);}}/>
+                <TextField floatingLabelText={lang.addElementMenu.width} onChange={(change, value) => {this.widthChange(change, value);}}/>
+                <TextField floatingLabelText={lang.addElementMenu.amount} defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
                 <RadioButtonGroup name="Texture" defaultSelected="none" onChange={(change,value) => {this.textureChange(change,value);}}>
-                    <RadioButton value="none" label="none"/>
-                    <RadioButton value="vertical" label="vertical"/>
-                    <RadioButton value="horizontal" label="horizontal"/>
+                    <RadioButton value="none" label={lang.addElementMenu.texture.none}/>
+                    <RadioButton value="vertical" label={lang.addElementMenu.texture.vertical}/>
+                    <RadioButton value="horizontal" label={lang.addElementMenu.texture.horizontal}/>
                 </RadioButtonGroup>
                 <div className="elementDisplay">
                     <div className="elementTop">
@@ -153,7 +189,7 @@ class AddElementMenu extends React.Component {
                         <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('bottom', c);}}></Checkbox>
                     </div>
                 </div>
-                <RaisedButton label="Add element" primary={true} onClick={()=> {this.submitElement();}}/>
+                <RaisedButton label={lang.addElementMenu.addElement} primary={true} onClick={()=> {this.submitElement();}}/>
             </div>
         );
     }
@@ -198,17 +234,17 @@ class AddBoardMenu extends React.Component {
         return (
             <div>
                 <div>
-                    Add board
+                    {lang.addBoardMenu.addBoard}
                 </div>
-                <TextField floatingLabelText="Height" onChange={(change, value) => {this.heightChange(change, value);}}/>
-                <TextField floatingLabelText="Width" onChange={(change, value) => {this.widthChange(change, value);}}/>
-                <TextField floatingLabelText="Amount" defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
+                <TextField floatingLabelText={lang.addBoardMenu.height} onChange={(change, value) => {this.heightChange(change, value);}}/>
+                <TextField floatingLabelText={lang.addBoardMenu.width} onChange={(change, value) => {this.widthChange(change, value);}}/>
+                <TextField floatingLabelText={lang.addBoardMenu.amount} defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
                 <RadioButtonGroup name="Texture" defaultSelected="none" onChange={(change,value) => {this.textureChange(change,value);}}>
-                    <RadioButton value="none" label="none"/>
-                    <RadioButton value="vertical" label="vertical"/>
-                    <RadioButton value="horizontal" label="horizontal"/>
+                    <RadioButton value="none" label={lang.addBoardMenu.texture.none}/>
+                    <RadioButton value="vertical" label={lang.addBoardMenu.texture.vertical}/>
+                    <RadioButton value="horizontal" label={lang.addBoardMenu.texture.horizontal}/>
                 </RadioButtonGroup>
-                <RaisedButton label="Add board" primary={true} onClick={()=> {this.submitBoard();}}/>
+                <RaisedButton label={lang.addBoardMenu.addBoard} primary={true} onClick={()=> {this.submitBoard();}}/>
             </div>
         );
     }
@@ -249,13 +285,13 @@ class Settings extends React.Component {
         return(
             <div>
                 <div>
-                    <TextField floatingLabelText="Kerf" value={this.props.kerf} onChange={(change, value) => {this.setKerf(change, value);}}/>
+                    <TextField floatingLabelText={lang.settings.kerf} value={this.props.kerf} onChange={(change, value) => {this.setKerf(change, value);}}/>
                 </div>
                 <div>
-                    <TextField floatingLabelText="Rim margin" value={this.props.rimMargin} onChange={(change, value) => {this.setRimMargin(change, value);}}/>
+                    <TextField floatingLabelText={lang.settings.rimMargin} value={this.props.rimMargin} onChange={(change, value) => {this.setRimMargin(change, value);}}/>
                 </div>
                 <div>
-                    <TextField floatingLabelText="Board margin" value={this.props.boardMargin} onChange={(change, value) => {this.setBoardMargin(change, value);}}/>
+                    <TextField floatingLabelText={lang.settings.boardMargin} value={this.props.boardMargin} onChange={(change, value) => {this.setBoardMargin(change, value);}}/>
                 </div>
             </div>
         );
@@ -288,16 +324,16 @@ class ElementTable extends React.Component {
                     <tbody>
                         <tr>
                             <td>
-                                Height
+                                {lang.addElementMenu.height}
                             </td>
                             <td>
-                                Width
+                                {lang.addElementMenu.width}
                             </td>
                             <td>
-                                Texture
+                                {lang.addElementMenu.texture.texture}
                             </td>
                             <td>
-                                Amount
+                                {lang.addElementMenu.amount}
                             </td>
                         </tr>
                         {this.props.elements.map(function(element){
@@ -333,16 +369,16 @@ class BoardsTable extends React.Component {
                     <tbody>
                         <tr>
                             <td>
-                                Height
+                                {lang.addBoardMenu.height}
                             </td>
                             <td>
-                                Width
+                                {lang.addBoardMenu.width}
                             </td>
                             <td>
-                                Texture
+                                {lang.addBoardMenu.texture.texture}
                             </td>
                             <td>
-                                Amount
+                                {lang.addBoardMenu.amount}
                             </td>
                         </tr>
                         {this.props.boards.map(function(element){
@@ -379,9 +415,9 @@ class Result extends React.Component {
                 ctx.font = '12px serif';
                 board.strips.forEach((strip) => {
                     strip.elements.forEach((element) => {
-                        ctx.strokeRect(strip.x + element.x, strip.y + element.y, element.width, element.height);
-                        ctx.fillText(element.height, strip.x + element.x + 5, strip.y + element.y + element.height/2);
-                        ctx.fillText(element.width, strip.x + element.x + element.width/2, strip.y + element.y + 16);
+                        ctx.strokeRect((strip.x + element.x)/board.scale, (strip.y + element.y)/board.scale, element.width / board.scale, element.height/ board.scale);
+                        ctx.fillText(element.height,( strip.x + element.x + 5)/ board.scale, (strip.y + element.y + element.height/2)/board.scale);
+                        ctx.fillText(element.width, (strip.x + element.x + element.width/2) / board.scale, (strip.y + element.y + 16)/ board.scale);
                     });
                 });
             }
@@ -392,19 +428,20 @@ class Result extends React.Component {
         return (
             <div>
                 <div>
-                    rim needed: {this.props.data.rim}
+                    {lang.results.rim}: {this.props.data.rim}
                 </div>
                 <div>
-                    elements not optimized: {this.props.data.elementsNotOptimized.length}
+                    {lang.results.notOptimized}: {this.props.data.elementsNotOptimized.length}
                 </div>
                 <div>
                     {this.props.data.boardsOptimized.map((board, index) => {
                         if(board.strips.length > 0) {
+                            board.scale = board.width / 800;
                             return(
                                 <div>
-                                    {"board nr :" + (index + 1)}
+                                    {lang.results.boardNumber + (index + 1)}
                                     <br/>
-                                    <canvas id={"board" + index} width={board.width} height={board.height}></canvas>
+                                    <canvas id={"board" + index} width={board.width / board.scale} height={board.height / board.scale}></canvas>
                                 </div>
                             );
                         } else {
@@ -501,18 +538,16 @@ class App extends React.Component {
                 <AppBar title="SolanaCut"/>
                 <AddElementMenu onAdd={()=>{this.getElements();}}/>
                 <ElementTable elements={this.state.elements}/>
+                <hr/>
                 <AddBoardMenu  onAdd={()=>{this.getBoards();}}/>
                 <BoardsTable boards={this.state.boards}/>
+                <hr/>
                 <Settings kerf={this.state.kerf} rimMargin={this.state.rimMargin} boardMargin={this.state.boardMargin}/>
                 <RaisedButton label="cut" primary={true} onClick={()=> {cut();}}/>
             </div>
         </MuiThemeProvider>
         );
     }
-}
-
-function draw(cut) {
-
 }
 
 function update() {
