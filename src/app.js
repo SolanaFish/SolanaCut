@@ -35,12 +35,11 @@ let cut = () => {
     req.send(null);
     req.onreadystatechange = function() {
         if (req.readyState == 4 && req.status == 200) {
-            console.log(req.responseText);
             ReactDom.render(
                 <MuiThemeProvider>
                 <div>
                     <AppBar title="SolanaCut - cut results"/>
-                    <Result id="test" data={JSON.parse(req.responseText)}/>
+                    <Result data={JSON.parse(req.responseText)}/>
                 </div>
             </MuiThemeProvider>, document.getElementById('app'));
 
@@ -61,7 +60,6 @@ let addElement = (height, width, texture = null, amount = 1, rims = {
     req.send(`height=${height}&width=${width}&texture=${texture}&amount=${amount}&rims=${JSON.stringify(rims)}`);
     req.onreadystatechange = function() {
         if (req.readyState == 4 && req.status == 200) {
-            console.log(req.responseText);
         }
     };
 };
@@ -190,6 +188,7 @@ class AddElementMenu extends React.Component {
                 this.rims = null;
             }
             addElement(this.height, this.width, this.texture, this.amount, this.rims);
+            this.props.onAdd();
         }
     }
 }
@@ -218,9 +217,11 @@ class AddBoardMenu extends React.Component {
     }
     heightChange(e, v) {
         this.height = JSON.parse(v);
+        console.log(this.height);
     }
     widthChange(e, v) {
         this.width = JSON.parse(v);
+        console.log(this.width);
     }
     amountChange(e, v) {
         this.amount = JSON.parse(v);
@@ -238,24 +239,23 @@ class AddBoardMenu extends React.Component {
                 this.amount = 1;
             }
             addBoard(this.height, this.width, this.texture, this.amount);
+            this.props.onAdd();
         }
     }
 }
 
 class Settings extends React.Component {
     render() {
-        console.log(`render settings kerf: ${this.props.kerf}`);
         return(
             <div>
                 <div>
-                    {this.props.kerf}
-                    <TextField floatingLabelText="Kerf" defaultValue={this.props.kerf} onChange={(change, value) => {this.setKerf(change, value);}}/>
+                    <TextField floatingLabelText="Kerf" value={this.props.kerf} onChange={(change, value) => {this.setKerf(change, value);}}/>
                 </div>
                 <div>
-                    <TextField floatingLabelText="Rim margin" defaultValue="100" onChange={(change, value) => {this.setRimMargin(change, value);}}/>
+                    <TextField floatingLabelText="Rim margin" value={this.props.rimMargin} onChange={(change, value) => {this.setRimMargin(change, value);}}/>
                 </div>
                 <div>
-                    <TextField floatingLabelText="Board margin" defaultValue="30" onChange={(change, value) => {this.setBoardMargin(change, value);}}/>
+                    <TextField floatingLabelText="Board margin" value={this.props.boardMargin} onChange={(change, value) => {this.setBoardMargin(change, value);}}/>
                 </div>
             </div>
         );
@@ -284,78 +284,110 @@ class ElementTable extends React.Component {
     render() {
         return (
             <div>
-                <Table fixedHeader={this.state.fixedHeader}
-                    fixedFooter={this.state.fixedFooter}
-                    selectable={this.state.selectable}
-                    multiSelectable={this.state.multiSelectable}
-                    onCellClick={()=> {this.setState({elements:elements});console.log('elements');}}>
-                    <TableHeader
-                        displaySelectedAll={this.state.showCheckboxes}
-                        adjustForCheckbox={this.state.showCheckboxes}
-                        enableSelectAll={this.state.enableSelectAll}>
-                        <TableRow>
-                            <TableHeaderColumn colSpan="4">
-                                Elements table
-                            </TableHeaderColumn>
-                        </TableRow>
-                        <TableRow>
-                            <TableHeaderColumn>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
                                 Height
-                            </TableHeaderColumn>
-                            <TableHeaderColumn>
+                            </td>
+                            <td>
                                 Width
-                            </TableHeaderColumn>
-                            <TableHeaderColumn>
+                            </td>
+                            <td>
                                 Texture
-                            </TableHeaderColumn>
-                            <TableHeaderColumn>
+                            </td>
+                            <td>
                                 Amount
-                            </TableHeaderColumn>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody
-                        displayRowCheckbox={this.state.showCheckboxes}
-                        deselectOnClickaway={this.state.deselectOnClickaway}
-                        showRowHover={this.state.showRowHover}
-                        strippedRows={this.state.strippedRows}>
-                        {elements.forEach((element, index) => {
-                            <TableRow>
-                                <TableRowColumn>
-                                    asd
-                                </TableRowColumn>
-                                <TableRowColumn>
-                                    {element.width}
-                                </TableRowColumn>
-                                <TableRowColumn>
-                                    {element.height}
-                                </TableRowColumn>
-                                <TableRowColumn>
-                                    {element.height}
-                                </TableRowColumn>
-                            </TableRow>;
+                            </td>
+                        </tr>
+                        {this.props.elements.map(function(element){
+                            return(
+                                <tr>
+                                    <td>
+                                        {element.height}
+                                    </td>
+                                    <td>
+                                        {element.width}
+                                    </td>
+                                    <td>
+                                        {element.texture}
+                                    </td>
+                                    <td>
+                                        {element.amount}
+                                    </td>
+                                </tr>
+                            );
                         })}
-                        <TableRow>
-                            <TableRowColumn>
-                                t
-                            </TableRowColumn>
-                            <TableRowColumn>
-                                e1
-                            </TableRowColumn>
-                            <TableRowColumn>
-                                s
-                            </TableRowColumn>
-                            <TableRowColumn>
-                                t
-                            </TableRowColumn>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+}
+
+class BoardsTable extends React.Component {
+    render() {
+        return (
+            <div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                Height
+                            </td>
+                            <td>
+                                Width
+                            </td>
+                            <td>
+                                Texture
+                            </td>
+                            <td>
+                                Amount
+                            </td>
+                        </tr>
+                        {this.props.boards.map(function(element){
+                            return(
+                                <tr>
+                                    <td>
+                                        {element.height}
+                                    </td>
+                                    <td>
+                                        {element.width}
+                                    </td>
+                                    <td>
+                                        {element.texture}
+                                    </td>
+                                    <td>
+                                        {element.amount}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
         );
     }
 }
 
 class Result extends React.Component {
+    componentDidMount() {
+        this.props.data.boardsOptimized.forEach((board, index) => {
+            if(board.strips.length > 0) {
+                let canvas = document.getElementById(`board${index}`);
+                let ctx = canvas.getContext('2d');
+                ctx.font = '12px serif';
+                board.strips.forEach((strip) => {
+                    strip.elements.forEach((element) => {
+                        ctx.strokeRect(strip.x + element.x, strip.y + element.y, element.width, element.height);
+                        ctx.fillText(element.height, strip.x + element.x + 5, strip.y + element.y + element.height/2);
+                        ctx.fillText(element.width, strip.x + element.x + element.width/2, strip.y + element.y + 16);
+                    });
+                });
+            }
+        });
+    }
+
     render() {
         return (
             <div>
@@ -365,7 +397,21 @@ class Result extends React.Component {
                 <div>
                     elements not optimized: {this.props.data.elementsNotOptimized.length}
                 </div>
-                <canvas id="page" width="1000" height="1000"></canvas>
+                <div>
+                    {this.props.data.boardsOptimized.map((board, index) => {
+                        if(board.strips.length > 0) {
+                            return(
+                                <div>
+                                    {"board nr :" + (index + 1)}
+                                    <br/>
+                                    <canvas id={"board" + index} width={board.width} height={board.height}></canvas>
+                                </div>
+                            );
+                        } else {
+                            return;
+                        }
+                    })}
+                </div>
             </div>
         );
     }
@@ -374,11 +420,12 @@ class Result extends React.Component {
 class App extends React.Component {
     constructor(props) {
         super(props);
-        console.log('construct');
-        this.state = {kerf: 10};
+        this.state = {kerf: 10, elements:[], boards:[], rimMargin:0, boardMargin:0};
         this.getKerf();
         this.getBoardMargin();
         this.getRimMargin();
+        this.getElements();
+        this.getBoards();
     }
 
     getElements() {
@@ -389,7 +436,6 @@ class App extends React.Component {
         let that = this;
         req.onreadystatechange = function() {
             if (req.readyState == 4 && req.status == 200) {
-                // that.state.elements = JSON.parse(req.responseText);
                 that.setState({elements:JSON.parse(req.responseText)});
             }
         };
@@ -403,7 +449,8 @@ class App extends React.Component {
         let that = this;
         req.onreadystatechange = function() {
             if (req.readyState == 4 && req.status == 200) {
-                that.state.boards = JSON.parse(req.responseText);
+                that.setState({boards:JSON.parse(req.responseText)});
+                console.log('ddddd');
             }
         };
     }
@@ -416,8 +463,6 @@ class App extends React.Component {
         let that = this;
         req.onreadystatechange = function() {
             if (req.readyState == 4 && req.status == 200) {
-                // that.state.kerf = JSON.parse(req.responseText);
-                console.log(req.responseText);
                 that.setState({kerf:JSON.parse(req.responseText)});
             }
         };
@@ -431,7 +476,7 @@ class App extends React.Component {
         let that = this;
         req.onreadystatechange = function() {
             if (req.readyState == 4 && req.status == 200) {
-                that.state.rimMargin = JSON.parse(req.responseText);
+                that.setState({rimMargin:JSON.parse(req.responseText)});
             }
         };
     }
@@ -444,21 +489,21 @@ class App extends React.Component {
         let that = this;
         req.onreadystatechange = function() {
             if (req.readyState == 4 && req.status == 200) {
-                that.state.boardMargin = JSON.parse(req.responseText);
+                that.setState({boardMargin:JSON.parse(req.responseText)});
             }
         };
     }
 
     render() {
-        console.log('render');
-        console.log(`render kerf:${this.state.kerf}`);
         return(
             <MuiThemeProvider>
             <div>
                 <AppBar title="SolanaCut"/>
-                <AddElementMenu/>
-                <AddBoardMenu/>
-                <Settings kerf={this.state.kerf}/>
+                <AddElementMenu onAdd={()=>{this.getElements();}}/>
+                <ElementTable elements={this.state.elements}/>
+                <AddBoardMenu  onAdd={()=>{this.getBoards();}}/>
+                <BoardsTable boards={this.state.boards}/>
+                <Settings kerf={this.state.kerf} rimMargin={this.state.rimMargin} boardMargin={this.state.boardMargin}/>
                 <RaisedButton label="cut" primary={true} onClick={()=> {cut();}}/>
             </div>
         </MuiThemeProvider>
@@ -467,13 +512,7 @@ class App extends React.Component {
 }
 
 function draw(cut) {
-    let canvas = document.getElementById('page');
-    let ctx = canvas.getContext('2d');
-    cut.boardsOptimized[0].strips.forEach((strip) => {
-        strip.elements.forEach((element) => {
-            ctx.strokeRect(strip.x + element.x, strip.y + element.y, element.width, element.height);
-        });
-    });
+
 }
 
 function update() {

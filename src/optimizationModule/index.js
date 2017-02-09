@@ -49,6 +49,10 @@ class strip { // Class of a stripe in a board that can fit elements and free spa
                 if (!done && free.width - this.elements.length * kerf >= element.width) {
                     this.elements.push(new placedElement(free.x, free.y, element.height, element.width, element.texture, element.rims));
                     this.free.splice(index, 1);
+                    if(this.height > element.height) {
+                        this.free.push(new freeSpace(free.x, free.y+ element.height, free.height - element.height, element.width));
+                        console.log('d');
+                    }
                     this.free.push(new freeSpace(free.x + element.width, free.y, free.height, free.width - element.width));
                     done = true;
                 }
@@ -102,6 +106,8 @@ let boards = []; // Array of board that elements will get fitted into
 let kerf = 3; // Kerf that is added for every cut
 let rimMargin = 100; // Margin that is added to every rim length
 let boardMargin = 30; // Margin that is rubtracted of every boards sizew
+let orginalBoards = [];
+let orginalElements = [];
 
 module.exports = () => {
     let elementsNotOptimized = []; // Array of elements that cannot be optimalized (they don't fit into any board)
@@ -138,7 +144,6 @@ module.exports = () => {
     elementsLeft.forEach((element) => {
         if(element.texture === null) {
             if(element.width < element.height) {
-                console.log('d');
                 element.rotate();
             }
         }
@@ -216,6 +221,13 @@ module.exports.addElement = (height, width, texture = null, amount = 1, rims = {
     bottom: false,
     left: false
 }) => {
+    orginalElements.push({
+        height: height,
+        width: width,
+        texture: texture,
+        amount: amount,
+        rims: rims
+    });
     for (let i = 0; i < amount; i++) {
         let rimsLength = 0;
         if (rims.top) {
@@ -235,6 +247,12 @@ module.exports.addElement = (height, width, texture = null, amount = 1, rims = {
 };
 
 module.exports.addBoard = (height, width, texture = null, amount = 1) => {
+    orginalBoards.push({
+        height: height,
+        width: width,
+        texture: texture,
+        amount: amount
+    });
     for (let i = 0; i < amount; i++) {
         boards.push(new board(height, width, texture));
     }
@@ -249,7 +267,7 @@ module.exports.setRimMargin = (newRimMargin) => {
 };
 
 module.exports.getElements = () => {
-    return elements;
+    return orginalElements;
 };
 
 module.exports.setBoardMargin = (newBoardMargin) => {
@@ -257,7 +275,7 @@ module.exports.setBoardMargin = (newBoardMargin) => {
 };
 
 module.exports.getBoards = () => {
-    return boards;
+    return orginalBoards;
 };
 
 module.exports.getKerf = () => {
