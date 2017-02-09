@@ -206,7 +206,7 @@ module.exports = () => {
                         board.fitElement(element);
                         done = true;
                     } else {
-                        if(elementsWithSameHeightHeight < board.width && elementsWithSameHeightHeight > board.width / 2) {
+                        if(elementsWithSameHeightHeight < board.width && elementsWithSameHeightHeight > board.width / 2 && !elementsWithSameHeightTexture) {
                             elementsWithSameHeight.forEach((element) => {
                                 element.rotate();
                             });
