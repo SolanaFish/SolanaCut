@@ -114,7 +114,7 @@ let elements = []; // Array of elements that need to be optimalized
 let boards = []; // Array of board that elements will get fitted into
 let kerf = 3; // Kerf that is added for every cut
 let rimMargin = 100; // Margin that is added to every rim length
-let boardMargin = 30; // Margin that is rubtracted of every boards sizew
+let boardMargin = 15; // Margin that is rubtracted of every boards sizew
 let orginalBoards = [];
 let orginalElements = [];
 

@@ -160,36 +160,41 @@ class AddElementMenu extends React.Component {
     }
     render() {
         return (
-            <div>
-                <div>
-                    {lang.addElementMenu.addElement}
-                </div>
-                <TextField floatingLabelText={lang.addElementMenu.height} onChange={(change, value) => {this.heightChange(change, value);}}/>
-                <TextField floatingLabelText={lang.addElementMenu.width} onChange={(change, value) => {this.widthChange(change, value);}}/>
-                <TextField floatingLabelText={lang.addElementMenu.amount} defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
-                <RadioButtonGroup name="Texture" defaultSelected="none" onChange={(change,value) => {this.textureChange(change,value);}}>
-                    <RadioButton value="none" label={lang.addElementMenu.texture.none}/>
-                    <RadioButton value="vertical" label={lang.addElementMenu.texture.vertical}/>
-                    <RadioButton value="horizontal" label={lang.addElementMenu.texture.horizontal}/>
-                </RadioButtonGroup>
-                <div className="elementDisplay">
-                    <div className="elementTop">
-                        <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('top', c);}}/>
+            <div className="container">
+                <div className="subContainer">
+                    <div>
+                        {lang.addElementMenu.addElement}
                     </div>
-                    <div className="elementMiddle">
-                        <div className="elementSide">
-                            <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('left', c);}}></Checkbox>
+                    <TextField floatingLabelText={lang.addElementMenu.height} onChange={(change, value) => {this.heightChange(change, value);}}/>
+                    <TextField floatingLabelText={lang.addElementMenu.width} onChange={(change, value) => {this.widthChange(change, value);}}/>
+                    <TextField floatingLabelText={lang.addElementMenu.amount} defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
+                    <RadioButtonGroup name="Texture" defaultSelected="none" onChange={(change,value) => {this.textureChange(change,value);}}>
+                        <RadioButton value="none" label={lang.addElementMenu.texture.none}/>
+                        <RadioButton value="vertical" label={lang.addElementMenu.texture.vertical}/>
+                        <RadioButton value="horizontal" label={lang.addElementMenu.texture.horizontal}/>
+                    </RadioButtonGroup>
+                    <div className="elementDisplay">
+                        <div className="elementTop">
+                            <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('top', c);}}/>
                         </div>
-                        <div id="element"></div>
-                        <div className="elementSide">
-                            <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('right', c);}}></Checkbox>
+                        <div className="elementMiddle">
+                            <div className="elementSide">
+                                <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('left', c);}}></Checkbox>
+                            </div>
+                            <div id="element"></div>
+                            <div className="elementSide">
+                                <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('right', c);}}></Checkbox>
+                            </div>
+                        </div>
+                        <div className="elementTop">
+                            <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('bottom', c);}}></Checkbox>
                         </div>
                     </div>
-                    <div className="elementTop">
-                        <Checkbox labelPosition="" onCheck={(e, c) => {this.rimsChange('bottom', c);}}></Checkbox>
-                    </div>
+                    <RaisedButton label={lang.addElementMenu.addElement} primary={true} onClick={()=> {this.submitElement();}}/>
                 </div>
-                <RaisedButton label={lang.addElementMenu.addElement} primary={true} onClick={()=> {this.submitElement();}}/>
+                <div className="subContainer">
+                    <ElementTable elements={this.props.elements}/>
+                </div>
             </div>
         );
     }
@@ -232,19 +237,24 @@ class AddElementMenu extends React.Component {
 class AddBoardMenu extends React.Component {
     render() {
         return (
-            <div>
-                <div>
-                    {lang.addBoardMenu.addBoard}
+            <div className="container">
+                <div className="subContainer">
+                    <div>
+                        {lang.addBoardMenu.addBoard}
+                    </div>
+                    <TextField floatingLabelText={lang.addBoardMenu.height} onChange={(change, value) => {this.heightChange(change, value);}}/>
+                    <TextField floatingLabelText={lang.addBoardMenu.width} onChange={(change, value) => {this.widthChange(change, value);}}/>
+                    <TextField floatingLabelText={lang.addBoardMenu.amount} defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
+                    <RadioButtonGroup name="Texture" defaultSelected="none" onChange={(change,value) => {this.textureChange(change,value);}}>
+                        <RadioButton value="none" label={lang.addBoardMenu.texture.none}/>
+                        <RadioButton value="vertical" label={lang.addBoardMenu.texture.vertical}/>
+                        <RadioButton value="horizontal" label={lang.addBoardMenu.texture.horizontal}/>
+                    </RadioButtonGroup>
+                    <RaisedButton label={lang.addBoardMenu.addBoard} primary={true} onClick={()=> {this.submitBoard();}}/>
                 </div>
-                <TextField floatingLabelText={lang.addBoardMenu.height} onChange={(change, value) => {this.heightChange(change, value);}}/>
-                <TextField floatingLabelText={lang.addBoardMenu.width} onChange={(change, value) => {this.widthChange(change, value);}}/>
-                <TextField floatingLabelText={lang.addBoardMenu.amount} defaultValue="1" onChange={(change, value) => {this.amountChange(change, value);}}/>
-                <RadioButtonGroup name="Texture" defaultSelected="none" onChange={(change,value) => {this.textureChange(change,value);}}>
-                    <RadioButton value="none" label={lang.addBoardMenu.texture.none}/>
-                    <RadioButton value="vertical" label={lang.addBoardMenu.texture.vertical}/>
-                    <RadioButton value="horizontal" label={lang.addBoardMenu.texture.horizontal}/>
-                </RadioButtonGroup>
-                <RaisedButton label={lang.addBoardMenu.addBoard} primary={true} onClick={()=> {this.submitBoard();}}/>
+                <div className="subContainer">
+                    <BoardsTable boards={this.props.boards}/>
+                </div>
             </div>
         );
     }
@@ -319,44 +329,44 @@ class Settings extends React.Component {
 class ElementTable extends React.Component {
     render() {
         return (
-            <div>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                {lang.addElementMenu.height}
-                            </td>
-                            <td>
-                                {lang.addElementMenu.width}
-                            </td>
-                            <td>
-                                {lang.addElementMenu.texture.texture}
-                            </td>
-                            <td>
-                                {lang.addElementMenu.amount}
-                            </td>
-                        </tr>
-                        {this.props.elements.map(function(element){
-                            return(
-                                <tr>
-                                    <td>
-                                        {element.height}
-                                    </td>
-                                    <td>
-                                        {element.width}
-                                    </td>
-                                    <td>
-                                        {element.texture}
-                                    </td>
-                                    <td>
-                                        {element.amount}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHeaderColumn>
+                            {lang.addElementMenu.height}
+                        </TableHeaderColumn>
+                        <TableHeaderColumn>
+                            {lang.addElementMenu.width}
+                        </TableHeaderColumn>
+                        <TableHeaderColumn>
+                            {lang.addElementMenu.texture.texture}
+                        </TableHeaderColumn>
+                        <TableHeaderColumn>
+                            {lang.addElementMenu.amount}
+                        </TableHeaderColumn>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {this.props.elements.map((element) => {
+                        return (
+                            <TableRow>
+                                <TableRowColumn>
+                                    {element.height}
+                                </TableRowColumn>
+                                <TableRowColumn>
+                                    {element.width}
+                                </TableRowColumn>
+                                <TableRowColumn>
+                                    {element.texture}
+                                </TableRowColumn>
+                                <TableRowColumn>
+                                    {element.amount}
+                                </TableRowColumn>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
         );
     }
 }
@@ -364,44 +374,44 @@ class ElementTable extends React.Component {
 class BoardsTable extends React.Component {
     render() {
         return (
-            <div>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                {lang.addBoardMenu.height}
-                            </td>
-                            <td>
-                                {lang.addBoardMenu.width}
-                            </td>
-                            <td>
-                                {lang.addBoardMenu.texture.texture}
-                            </td>
-                            <td>
-                                {lang.addBoardMenu.amount}
-                            </td>
-                        </tr>
-                        {this.props.boards.map(function(element){
-                            return(
-                                <tr>
-                                    <td>
-                                        {element.height}
-                                    </td>
-                                    <td>
-                                        {element.width}
-                                    </td>
-                                    <td>
-                                        {element.texture}
-                                    </td>
-                                    <td>
-                                        {element.amount}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHeaderColumn>
+                            {lang.addBoardMenu.height}
+                        </TableHeaderColumn>
+                        <TableHeaderColumn>
+                            {lang.addBoardMenu.width}
+                        </TableHeaderColumn>
+                        <TableHeaderColumn>
+                            {lang.addBoardMenu.texture.texture}
+                        </TableHeaderColumn>
+                        <TableHeaderColumn>
+                            {lang.addBoardMenu.amount}
+                        </TableHeaderColumn>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {this.props.boards.map((element) => {
+                        return (
+                            <TableRow>
+                                <TableRowColumn>
+                                    {element.height}
+                                </TableRowColumn>
+                                <TableRowColumn>
+                                    {element.width}
+                                </TableRowColumn>
+                                <TableRowColumn>
+                                    {element.texture}
+                                </TableRowColumn>
+                                <TableRowColumn>
+                                    {element.amount}
+                                </TableRowColumn>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
         );
     }
 }
@@ -536,12 +546,8 @@ class App extends React.Component {
             <MuiThemeProvider>
             <div>
                 <AppBar title="SolanaCut"/>
-                <AddElementMenu onAdd={()=>{this.getElements();}}/>
-                <ElementTable elements={this.state.elements}/>
-                <hr/>
-                <AddBoardMenu  onAdd={()=>{this.getBoards();}}/>
-                <BoardsTable boards={this.state.boards}/>
-                <hr/>
+                <AddElementMenu onAdd={()=>{this.getElements();}} elements={this.state.elements}/>
+                <AddBoardMenu  onAdd={()=>{this.getBoards();}} boards={this.state.boards}/>
                 <Settings kerf={this.state.kerf} rimMargin={this.state.rimMargin} boardMargin={this.state.boardMargin}/>
                 <RaisedButton label="cut" primary={true} onClick={()=> {cut();}}/>
             </div>
